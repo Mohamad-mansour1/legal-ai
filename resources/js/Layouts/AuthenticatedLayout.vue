@@ -1,198 +1,121 @@
 <script setup>
-import { ref } from 'vue';
-import ApplicationLogo from '@/Components/ApplicationLogo.vue';
-import Dropdown from '@/Components/Dropdown.vue';
-import DropdownLink from '@/Components/DropdownLink.vue';
-import NavLink from '@/Components/NavLink.vue';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
-import { Link } from '@inertiajs/vue3';
+    import { Link, usePage } from '@inertiajs/vue3'
+    import { computed } from 'vue'
+    import { useI18n } from 'vue-i18n'
 
-const showingNavigationDropdown = ref(false);
+    const page = usePage()
+    const { t, locale } = useI18n()
+
+    const isArabic = computed(() => locale.value === 'ar')
+
+    const isActive = (url) => page.url.startsWith(url)
+
+    const switchLang = () => {
+        locale.value = locale.value === 'ar' ? 'en' : 'ar'
+        localStorage.setItem('locale', locale.value)
+
+        document.documentElement.dir = locale.value === 'ar' ? 'rtl' : 'ltr'
+        document.documentElement.lang = locale.value
+    }
+
+    document.documentElement.dir = isArabic.value ? 'rtl' : 'ltr'
+    document.documentElement.lang = locale.value
 </script>
 
 <template>
-    <div>
-        <div class="min-h-screen bg-gray-100">
-            <nav
-                class="border-b border-gray-100 bg-white"
-            >
-                <!-- Primary Navigation Menu -->
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
-                            <!-- Logo -->
-                            <div class="flex shrink-0 items-center">
-                                <Link :href="route('dashboard')">
-                                    <ApplicationLogo
-                                        class="block h-9 w-auto fill-current text-gray-800"
-                                    />
-                                </Link>
-                            </div>
+    <div
+        class="min-h-screen bg-[#F5F1EA] flex"
+        :dir="isArabic ? 'rtl' : 'ltr'"
+    >
+        <aside class="w-72 bg-[#1F2933] text-white min-h-screen p-6 flex flex-col shadow-xl">
 
-                            <!-- Navigation Links -->
-                            <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
-                            >
-                                <NavLink
-                                    :href="route('dashboard')"
-                                    :active="route().current('dashboard')"
-                                >
-                                    Dashboard
-                                </NavLink>
-                            </div>
-                        </div>
+            <div class="mb-10">
+                <h1 class="text-2xl font-bold text-[#D4AF37]">
+                    {{ t('appName') }}
+                </h1>
 
-                        <div class="hidden sm:ms-6 sm:flex sm:items-center">
-                            <!-- Settings Dropdown -->
-                            <div class="relative ms-3">
-                                <Dropdown align="right" width="48">
-                                    <template #trigger>
-                                        <span class="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                class="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {{ $page.props.auth.user.name }}
+                <p class="text-sm text-gray-300 mt-1">
+                    Law Firm Management
+                </p>
+            </div>
 
-                                                <svg
-                                                    class="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </template>
+            <nav class="space-y-2 flex-1">
 
-                                    <template #content>
-                                        <DropdownLink
-                                            :href="route('profile.edit')"
-                                        >
-                                            Profile
-                                        </DropdownLink>
-                                        <DropdownLink
-                                            :href="route('logout')"
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </DropdownLink>
-                                    </template>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <!-- Hamburger -->
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button
-                                @click="
-                                    showingNavigationDropdown =
-                                        !showingNavigationDropdown
-                                "
-                                class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 transition duration-150 ease-in-out hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    class="h-6 w-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        :class="{
-                                            hidden: showingNavigationDropdown,
-                                            'inline-flex':
-                                                !showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        :class="{
-                                            hidden: !showingNavigationDropdown,
-                                            'inline-flex':
-                                                showingNavigationDropdown,
-                                        }"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Responsive Navigation Menu -->
-                <div
-                    :class="{
-                        block: showingNavigationDropdown,
-                        hidden: !showingNavigationDropdown,
-                    }"
-                    class="sm:hidden"
+                <Link
+                    href="/dashboard"
+                    class="block p-3 rounded-lg transition"
+                    :class="isActive('/dashboard') ? 'bg-[#D4AF37] text-black font-bold' : 'hover:bg-[#2E3A46]'"
                 >
-                    <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
+                    {{ t('dashboard') }}
+                </Link>
 
-                    <!-- Responsive Settings Options -->
-                    <div
-                        class="border-t border-gray-200 pb-1 pt-4"
-                    >
-                        <div class="px-4">
-                            <div
-                                class="text-base font-medium text-gray-800"
-                            >
-                                {{ $page.props.auth.user.name }}
-                            </div>
-                            <div class="text-sm font-medium text-gray-500">
-                                {{ $page.props.auth.user.email }}
-                            </div>
-                        </div>
+                <Link
+                    href="/users"
+                    class="block p-3 rounded-lg transition"
+                    :class="isActive('/users') ? 'bg-[#D4AF37] text-black font-bold' : 'hover:bg-[#2E3A46]'"
+                >
+                    {{ t('users') }}
+                </Link>
 
-                        <div class="mt-3 space-y-1">
-                            <ResponsiveNavLink :href="route('profile.edit')">
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                :href="route('logout')"
-                                method="post"
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
-                </div>
+                <Link
+                    href="/clients"
+                    class="block p-3 rounded-lg transition"
+                    :class="isActive('/clients') ? 'bg-[#D4AF37] text-black font-bold' : 'hover:bg-[#2E3A46]'"
+                >
+                    {{ t('clients') }}
+                </Link>
+
+                <Link
+                    href="/legal-cases"
+                    class="block p-3 rounded-lg transition"
+                    :class="isActive('/legal-cases') ? 'bg-[#D4AF37] text-black font-bold' : 'hover:bg-[#2E3A46]'"
+                >
+                    {{ t('legalCases') }}
+                </Link>
+
+                <Link
+                    href="/search"
+                    class="block p-3 rounded-lg transition"
+                    :class="isActive('/search') ? 'bg-[#D4AF37] text-black font-bold' : 'hover:bg-[#2E3A46]'"
+                >
+                    {{ t('globalSearch') }}
+                </Link>
+
             </nav>
 
-            <!-- Page Heading -->
-            <header
-                class="bg-white shadow"
-                v-if="$slots.header"
-            >
-                <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <slot name="header" />
-                </div>
-            </header>
+            <div class="border-t border-gray-600 pt-4 space-y-3">
+                <button
+                    @click="switchLang"
+                    class="w-full bg-white text-black p-2 rounded-lg font-bold"
+                >
+                    {{ locale === 'ar' ? 'English' : 'العربية' }}
+                </button>
+                <div>
 
-            <!-- Page Content -->
-            <main>
-                <slot />
-            </main>
-        </div>
+                    <p class="text-sm text-white font-bold">
+                        {{ page.props.auth.user.name }}
+                    </p>
+
+                    <p class="text-xs text-[#D4AF37] mt-1 uppercase">
+                        {{ page.props.auth.user.roles?.[0]?.replace('_', ' ') }}
+                    </p>
+
+                </div>
+
+                <Link
+                    href="/logout"
+                    method="post"
+                    as="button"
+                    class="w-full text-start p-3 rounded-lg hover:bg-[#2E3A46]"
+                >
+                    {{ t('logout') }}
+                </Link>
+            </div>
+
+        </aside>
+
+        <main class="flex-1 p-8">
+            <slot />
+        </main>
     </div>
 </template>

@@ -1,0 +1,22 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Client extends Model
+{
+    protected $fillable = [
+        'name',
+        'phone',
+        'email',
+        'national_id',
+        'address',
+        'notes',
+    ];
+    
+    public function legalCases()
+    {
+        return $this->hasMany(LegalCase::class);
+    }
+}
