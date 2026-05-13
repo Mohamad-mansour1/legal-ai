@@ -121,6 +121,13 @@ const messages = {
         uploading: 'Uploading...',
         searching: 'Searching...',
         processing: 'Processing...',
+        calendar: 'Calendar',
+        calendarSubtitle: 'Hearings, tasks, and office schedule',
+        notifications: 'Notifications',
+        noNotifications: 'No notifications',
+        casesByStatus: 'Cases by Status',
+        casesPerLawyer: 'Cases per Lawyer',
+        overdueTasks: 'Overdue Tasks',
     },
 
     ar: {
@@ -243,6 +250,13 @@ const messages = {
         uploading: 'جارٍ الرفع...',
         searching: 'جارٍ البحث...',
         processing: 'جارٍ المعالجة...',
+        calendar: 'التقويم',
+        calendarSubtitle: 'الجلسات والمهام وجدول المكتب',
+        notifications: 'الإشعارات',
+        noNotifications: 'لا توجد إشعارات',
+        casesByStatus: 'القضايا حسب الحالة',
+        casesPerLawyer: 'القضايا لكل محامٍ',
+        overdueTasks: 'المهام المتأخرة',
     }
 }
 

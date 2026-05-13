@@ -1,13 +1,15 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+
 import InputError from '@/Components/Form/InputError.vue'
 import TextInput from '@/Components/Form/TextInput.vue'
 import SelectInput from '@/Components/Form/SelectInput.vue'
 import TextareaInput from '@/Components/Form/TextareaInput.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 defineProps({
     clients: Array,
@@ -55,15 +57,19 @@ const submit = () => form.post('/legal-cases')
 
                     <div class="grid grid-cols-2 gap-6">
 
+                        <!-- Client -->
+
                         <div>
+
                             <label class="font-semibold">
                                 {{ t('client') }}
                             </label>
 
-                            <select
+                            <SelectInput
                                 v-model="form.client_id"
-                                class="w-full border rounded-xl p-3 mt-2"
+                                :error="form.errors.client_id"
                             >
+
                                 <option value="">
                                     {{ t('selectClient') }}
                                 </option>
@@ -75,17 +81,24 @@ const submit = () => form.post('/legal-cases')
                                 >
                                     {{ client.name }}
                                 </option>
-                            </select>
+
+                            </SelectInput>
+
+                            <InputError :message="form.errors.client_id" />
+
                         </div>
+
+                        <!-- Lawyer -->
+
                         <div>
 
                             <label class="font-semibold">
                                 {{ t('assignedLawyer') }}
                             </label>
 
-                            <select
+                            <SelectInput
                                 v-model="form.assigned_lawyer_id"
-                                class="w-full border rounded-xl p-3 mt-2"
+                                :error="form.errors.assigned_lawyer_id"
                             >
 
                                 <option value="">
@@ -100,9 +113,13 @@ const submit = () => form.post('/legal-cases')
                                     {{ lawyer.name }}
                                 </option>
 
-                            </select>
+                            </SelectInput>
+
+                            <InputError :message="form.errors.assigned_lawyer_id" />
 
                         </div>
+
+                        <!-- Trainee -->
 
                         <div>
 
@@ -110,9 +127,9 @@ const submit = () => form.post('/legal-cases')
                                 {{ t('assignedTrainee') }}
                             </label>
 
-                            <select
+                            <SelectInput
                                 v-model="form.assigned_trainee_id"
-                                class="w-full border rounded-xl p-3 mt-2"
+                                :error="form.errors.assigned_trainee_id"
                             >
 
                                 <option value="">
@@ -127,42 +144,64 @@ const submit = () => form.post('/legal-cases')
                                     {{ trainee.name }}
                                 </option>
 
-                            </select>
+                            </SelectInput>
+
+                            <InputError :message="form.errors.assigned_trainee_id" />
 
                         </div>
 
+                        <!-- Title -->
+
                         <div>
+
                             <label class="font-semibold">
                                 {{ t('caseTitle') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.title"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.title"
+                            />
+
+                            <InputError :message="form.errors.title" />
+
                         </div>
 
+                        <!-- Case Number -->
+
                         <div>
+
                             <label class="font-semibold">
                                 {{ t('caseNumber') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.case_number"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.case_number"
+                            />
+
+                            <InputError :message="form.errors.case_number" />
+
                         </div>
 
+                        <!-- Court -->
+
                         <div>
+
                             <label class="font-semibold">
                                 {{ t('court') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.court"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.court"
+                            />
+
+                            <InputError :message="form.errors.court" />
+
                         </div>
+
+                        <!-- Stage -->
 
                         <div>
 
@@ -170,9 +209,9 @@ const submit = () => form.post('/legal-cases')
                                 {{ t('status') }}
                             </label>
 
-                            <select
+                            <SelectInput
                                 v-model="form.case_stage_id"
-                                class="w-full border rounded-xl p-3 mt-2"
+                                :error="form.errors.case_stage_id"
                             >
 
                                 <option value="">
@@ -182,55 +221,78 @@ const submit = () => form.post('/legal-cases')
                                 <option
                                     v-for="stage in stages"
                                     :key="stage.id"
-                                    :value="stage.id"
+                                    :value="Number(stage.id)"
                                 >
-                                    {{ $i18n.locale === 'ar'
-                                        ? stage.name_ar
-                                        : stage.name_en
+                                    {{
+                                        locale === 'ar'
+                                            ? stage.name_ar
+                                            : stage.name_en
                                     }}
                                 </option>
 
-                            </select>
+                            </SelectInput>
+
+                            <InputError :message="form.errors.case_stage_id" />
 
                         </div>
 
+                        <!-- Hearing Date -->
+
                         <div>
+
                             <label class="font-semibold">
                                 {{ t('hearingDate') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.hearing_date"
                                 type="date"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.hearing_date"
+                            />
+
+                            <InputError :message="form.errors.hearing_date" />
+
                         </div>
 
                     </div>
 
+                    <!-- Description -->
+
                     <div>
+
                         <label class="font-semibold">
                             {{ t('description') }}
                         </label>
 
-                        <textarea
+                        <TextareaInput
                             v-model="form.description"
-                            rows="4"
-                            class="w-full border rounded-xl p-3 mt-2"
+                            :error="form.errors.description"
+                            :rows="4"
                         />
+
+                        <InputError :message="form.errors.description" />
+
                     </div>
 
+                    <!-- Notes -->
+
                     <div>
+
                         <label class="font-semibold">
                             {{ t('notes') }}
                         </label>
 
-                        <textarea
+                        <TextareaInput
                             v-model="form.notes"
-                            rows="4"
-                            class="w-full border rounded-xl p-3 mt-2"
+                            :error="form.errors.notes"
+                            :rows="4"
                         />
+
+                        <InputError :message="form.errors.notes" />
+
                     </div>
+
+                    <!-- Buttons -->
 
                     <div class="flex justify-between pt-4">
 
@@ -245,6 +307,7 @@ const submit = () => form.post('/legal-cases')
                             :disabled="form.processing"
                             class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
+
                             <span v-if="form.processing">
                                 {{ t('saving') }}
                             </span>
@@ -252,6 +315,7 @@ const submit = () => form.post('/legal-cases')
                             <span v-else>
                                 {{ t('saveCase') }}
                             </span>
+
                         </button>
 
                     </div>

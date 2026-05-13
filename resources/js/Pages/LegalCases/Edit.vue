@@ -1,6 +1,7 @@
 <script setup>
 import { useForm, Link, router } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import InputError from '@/Components/Form/InputError.vue'
 import TextInput from '@/Components/Form/TextInput.vue'
@@ -20,7 +21,7 @@ const props = defineProps({
 
 const form = useForm({
     client_id: props.legalCase.client_id,
-    case_stage_id: props.legalCase.case_stage_id,
+    case_stage_id: Number(props.legalCase.case_stage_id),
     title: props.legalCase.title,
     case_number: props.legalCase.case_number,
     court: props.legalCase.court,
@@ -44,18 +45,6 @@ const hearingForm = useForm({
     notes: '',
 })
 
-const uploadHearing = () => {
-    hearingForm.post(`/legal-cases/${props.legalCase.id}/hearings`, {
-        onSuccess: () => hearingForm.reset(),
-    })
-}
-
-const deleteHearing = (id) => {
-    if (confirm('Delete this hearing?')) {
-        router.delete(`/hearings/${id}`)
-    }
-}
-
 const taskForm = useForm({
     title: '',
     description: '',
@@ -65,21 +54,7 @@ const taskForm = useForm({
     due_date: '',
 })
 
-const addTask = () => {
-    taskForm.post(`/legal-cases/${props.legalCase.id}/tasks`, {
-        onSuccess: () => taskForm.reset(),
-    })
-}
-
-const deleteTask = (id) => {
-    if (confirm('Delete this task?')) {
-        router.delete(`/tasks/${id}`)
-    }
-}
-
-const submit = () => {
-    form.put(`/legal-cases/${props.legalCase.id}`)
-}
+const submit = () => form.put(`/legal-cases/${props.legalCase.id}`)
 
 const uploadDocument = () => {
     documentForm.post(`/legal-cases/${props.legalCase.id}/documents`, {
@@ -93,12 +68,35 @@ const deleteDocument = (id) => {
         router.delete(`/case-documents/${id}`)
     }
 }
+
+const uploadHearing = () => {
+    hearingForm.post(`/legal-cases/${props.legalCase.id}/hearings`, {
+        onSuccess: () => hearingForm.reset(),
+    })
+}
+
+const deleteHearing = (id) => {
+    if (confirm('Delete this hearing?')) {
+        router.delete(`/hearings/${id}`)
+    }
+}
+
+const addTask = () => {
+    taskForm.post(`/legal-cases/${props.legalCase.id}/tasks`, {
+        onSuccess: () => taskForm.reset(),
+    })
+}
+
+const deleteTask = (id) => {
+    if (confirm('Delete this task?')) {
+        router.delete(`/tasks/${id}`)
+    }
+}
 </script>
 
 <template>
     <AuthenticatedLayout>
         <div class="max-w-6xl mx-auto">
-
             <div class="mb-8">
                 <h1 class="text-3xl font-bold text-[#1F2933]">
                     {{ t('editCase') }}
@@ -111,18 +109,11 @@ const deleteDocument = (id) => {
 
             <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-8 mb-8">
                 <form @submit.prevent="submit" class="space-y-6">
-
                     <div class="grid grid-cols-2 gap-6">
-
                         <div>
-                            <label class="font-semibold">
-                                {{ t('client') }}
-                            </label>
+                            <label class="font-semibold">{{ t('client') }}</label>
 
-                            <select
-                                v-model="form.client_id"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                            <SelectInput v-model="form.client_id" :error="form.errors.client_id">
                                 <option
                                     v-for="client in clients"
                                     :key="client.id"
@@ -130,22 +121,19 @@ const deleteDocument = (id) => {
                                 >
                                     {{ client.name }}
                                 </option>
-                            </select>
+                            </SelectInput>
+
+                            <InputError :message="form.errors.client_id" />
                         </div>
+
                         <div>
+                            <label class="font-semibold">{{ t('assignedLawyer') }}</label>
 
-                            <label class="font-semibold">
-                                {{ t('assignedLawyer') }}
-                            </label>
-
-                            <select
+                            <SelectInput
                                 v-model="form.assigned_lawyer_id"
-                                class="w-full border rounded-xl p-3 mt-2"
+                                :error="form.errors.assigned_lawyer_id"
                             >
-
-                                <option value="">
-                                    --
-                                </option>
+                                <option value="">--</option>
 
                                 <option
                                     v-for="lawyer in lawyers"
@@ -154,128 +142,121 @@ const deleteDocument = (id) => {
                                 >
                                     {{ lawyer.name }}
                                 </option>
+                            </SelectInput>
 
-                            </select>
-
+                            <InputError :message="form.errors.assigned_lawyer_id" />
                         </div>
 
                         <div>
-                            <label class="font-semibold">
-                                {{ t('caseTitle') }}
-                            </label>
+                            <label class="font-semibold">{{ t('assignedTrainee') }}</label>
 
-                            <input
-                                v-model="form.title"
-                                class="w-full border rounded-xl p-3 mt-2"
+                            <SelectInput
+                                v-model="form.assigned_trainee_id"
+                                :error="form.errors.assigned_trainee_id"
                             >
-                        </div>
+                                <option value="">--</option>
 
-                        <div>
-                            <label class="font-semibold">
-                                {{ t('caseNumber') }}
-                            </label>
-
-                            <input
-                                v-model="form.case_number"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
-                        </div>
-
-                        <div>
-                            <label class="font-semibold">
-                                {{ t('court') }}
-                            </label>
-
-                            <input
-                                v-model="form.court"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
-                        </div>
-
-                        <div>
-                            <label class="font-semibold">
-                                {{ t('status') }}
-                            </label>
-
-                            <select
-                                v-model="form.case_stage_id"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
-                                <option value="">
-                                    --
+                                <option
+                                    v-for="trainee in trainees"
+                                    :key="trainee.id"
+                                    :value="trainee.id"
+                                >
+                                    {{ trainee.name }}
                                 </option>
+                            </SelectInput>
+
+                            <InputError :message="form.errors.assigned_trainee_id" />
+                        </div>
+
+                        <div>
+                            <label class="font-semibold">{{ t('caseTitle') }}</label>
+
+                            <TextInput v-model="form.title" :error="form.errors.title" />
+                            <InputError :message="form.errors.title" />
+                        </div>
+
+                        <div>
+                            <label class="font-semibold">{{ t('caseNumber') }}</label>
+
+                            <TextInput v-model="form.case_number" :error="form.errors.case_number" />
+                            <InputError :message="form.errors.case_number" />
+                        </div>
+
+                        <div>
+                            <label class="font-semibold">{{ t('court') }}</label>
+
+                            <TextInput v-model="form.court" :error="form.errors.court" />
+                            <InputError :message="form.errors.court" />
+                        </div>
+
+                        <div>
+                            <label class="font-semibold">{{ t('status') }}</label>
+
+                            <SelectInput v-model="form.case_stage_id" :error="form.errors.case_stage_id">
+                                <option value="">--</option>
 
                                 <option
                                     v-for="stage in stages"
                                     :key="stage.id"
-                                    :value="stage.id"
+                                    :value="Number(stage.id)"
                                 >
                                     {{ locale === 'ar' ? stage.name_ar : stage.name_en }}
                                 </option>
-                            </select>
+                            </SelectInput>
+
+                            <InputError :message="form.errors.case_stage_id" />
                         </div>
 
                         <div>
-                            <label class="font-semibold">
-                                {{ t('hearingDate') }}
-                            </label>
+                            <label class="font-semibold">{{ t('hearingDate') }}</label>
 
-                            <input
+                            <TextInput
                                 v-model="form.hearing_date"
                                 type="date"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.hearing_date"
+                            />
+
+                            <InputError :message="form.errors.hearing_date" />
                         </div>
-
                     </div>
 
                     <div>
-                        <label class="font-semibold">
-                            {{ t('description') }}
-                        </label>
+                        <label class="font-semibold">{{ t('description') }}</label>
 
-                        <textarea
+                        <TextareaInput
                             v-model="form.description"
-                            rows="4"
-                            class="w-full border rounded-xl p-3 mt-2"
+                            :error="form.errors.description"
+                            :rows="4"
                         />
+
+                        <InputError :message="form.errors.description" />
                     </div>
 
                     <div>
-                        <label class="font-semibold">
-                            {{ t('notes') }}
-                        </label>
+                        <label class="font-semibold">{{ t('notes') }}</label>
 
-                        <textarea
+                        <TextareaInput
                             v-model="form.notes"
-                            rows="4"
-                            class="w-full border rounded-xl p-3 mt-2"
+                            :error="form.errors.notes"
+                            :rows="4"
                         />
+
+                        <InputError :message="form.errors.notes" />
                     </div>
 
                     <div class="flex justify-between pt-4">
-                        <Link
-                            href="/legal-cases"
-                            class="px-5 py-3 rounded-xl border"
-                        >
+                        <Link href="/legal-cases" class="px-5 py-3 rounded-xl border">
                             {{ t('cancel') }}
                         </Link>
 
-                        
                         <button
                             :disabled="form.processing"
                             class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <span v-if="form.processing">
-                                {{ t('updating') }}
-                            </span>
-
-                            <span v-else>
-                                {{ t('updateCase') }}
-                            </span>
+                            <span v-if="form.processing">{{ t('saving') }}</span>
+                            <span v-else>{{ t('updateCase') }}</span>
                         </button>
                     </div>
-
                 </form>
             </div>
 
@@ -284,44 +265,37 @@ const deleteDocument = (id) => {
                     {{ t('uploadDocument') }}
                 </h2>
 
-                <form
-                    @submit.prevent="uploadDocument"
-                    class="grid grid-cols-3 gap-4 items-end"
-                >
+                <form @submit.prevent="uploadDocument" class="grid grid-cols-3 gap-4 items-end">
                     <div>
-                        <label class="font-semibold">
-                            {{ t('documentTitle') }}
-                        </label>
+                        <label class="font-semibold">{{ t('documentTitle') }}</label>
 
-                        <input
+                        <TextInput
                             v-model="documentForm.title"
-                            class="w-full border rounded-xl p-3 mt-2"
-                        >
+                            :error="documentForm.errors.title"
+                        />
+
+                        <InputError :message="documentForm.errors.title" />
                     </div>
 
                     <div>
-                        <label class="font-semibold">
-                            {{ t('file') }}
-                        </label>
+                        <label class="font-semibold">{{ t('file') }}</label>
 
                         <input
                             type="file"
                             class="w-full border rounded-xl p-3 mt-2"
+                            :class="documentForm.errors.file ? 'border-red-500' : 'border-gray-300'"
                             @change="documentForm.file = $event.target.files[0]"
                         >
+
+                        <InputError :message="documentForm.errors.file" />
                     </div>
 
                     <button
                         :disabled="documentForm.processing"
                         class="bg-[#1F2933] text-white px-6 py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <span v-if="documentForm.processing">
-                            {{ t('uploading') }}
-                        </span>
-
-                        <span v-else>
-                            {{ t('upload') }}
-                        </span>
+                        <span v-if="documentForm.processing">{{ t('uploading') }}</span>
+                        <span v-else>{{ t('upload') }}</span>
                     </button>
                 </form>
             </div>
@@ -337,13 +311,8 @@ const deleteDocument = (id) => {
                     class="border rounded-xl p-4 mb-3 flex justify-between items-center"
                 >
                     <div>
-                        <div class="font-bold">
-                            {{ document.title }}
-                        </div>
-
-                        <div class="text-sm text-gray-500">
-                            {{ document.file_name }}
-                        </div>
+                        <div class="font-bold">{{ document.title }}</div>
+                        <div class="text-sm text-gray-500">{{ document.file_name }}</div>
                     </div>
 
                     <div class="flex gap-2">
@@ -364,189 +333,91 @@ const deleteDocument = (id) => {
                     </div>
                 </div>
             </div>
-            <!-- Hearings -->
 
             <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-8 mt-8">
-
                 <h2 class="text-xl font-bold text-[#1F2933] mb-6">
                     {{ t('hearings') }}
                 </h2>
 
-                <form
-                    @submit.prevent="uploadHearing"
-                    class="grid grid-cols-2 gap-6 mb-8"
-                >
-
-                    <!-- Title -->
-
+                <form @submit.prevent="uploadHearing" class="grid grid-cols-2 gap-6 mb-8">
                     <div>
-
-                        <label class="font-semibold">
-                            {{ t('hearingTitle') }}
-                        </label>
-
-                        <input
-                            v-model="hearingForm.title"
-                            class="w-full border rounded-xl p-3 mt-2"
-                        >
-
+                        <label class="font-semibold">{{ t('hearingTitle') }}</label>
+                        <TextInput v-model="hearingForm.title" :error="hearingForm.errors.title" />
+                        <InputError :message="hearingForm.errors.title" />
                     </div>
 
-                    <!-- Court -->
-
                     <div>
-
-                        <label class="font-semibold">
-                            {{ t('court') }}
-                        </label>
-
-                        <input
-                            v-model="hearingForm.court"
-                            class="w-full border rounded-xl p-3 mt-2"
-                        >
-
+                        <label class="font-semibold">{{ t('court') }}</label>
+                        <TextInput v-model="hearingForm.court" :error="hearingForm.errors.court" />
+                        <InputError :message="hearingForm.errors.court" />
                     </div>
 
-                    <!-- Date -->
-
                     <div>
-
-                        <label class="font-semibold">
-                            {{ t('hearingDate') }}
-                        </label>
-
-                        <input
+                        <label class="font-semibold">{{ t('hearingDate') }}</label>
+                        <TextInput
                             v-model="hearingForm.hearing_date"
                             type="datetime-local"
-                            class="w-full border rounded-xl p-3 mt-2"
-                        >
-
+                            :error="hearingForm.errors.hearing_date"
+                        />
+                        <InputError :message="hearingForm.errors.hearing_date" />
                     </div>
-
-                    <!-- Result -->
 
                     <div>
-
-                        <label class="font-semibold">
-                            {{ t('result') }}
-                        </label>
-
-                        <input
-                            v-model="hearingForm.result"
-                            class="w-full border rounded-xl p-3 mt-2"
-                        >
-
+                        <label class="font-semibold">{{ t('result') }}</label>
+                        <TextInput v-model="hearingForm.result" :error="hearingForm.errors.result" />
+                        <InputError :message="hearingForm.errors.result" />
                     </div>
-
-                    <!-- Notes -->
 
                     <div class="col-span-2">
-
-                        <label class="font-semibold">
-                            {{ t('notes') }}
-                        </label>
-
-                        <textarea
+                        <label class="font-semibold">{{ t('notes') }}</label>
+                        <TextareaInput
                             v-model="hearingForm.notes"
-                            rows="3"
-                            class="w-full border rounded-xl p-3 mt-2"
+                            :error="hearingForm.errors.notes"
+                            :rows="3"
                         />
-
+                        <InputError :message="hearingForm.errors.notes" />
                     </div>
 
-                    <!-- Button -->
-
                     <div class="col-span-2 flex justify-end">
-
                         <button
                             :disabled="hearingForm.processing"
                             class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <span v-if="hearingForm.processing">
-                                {{ t('saving') }}
-                            </span>
-
-                            <span v-else>
-                                {{ t('addHearing') }}
-                            </span>
+                            <span v-if="hearingForm.processing">{{ t('saving') }}</span>
+                            <span v-else>{{ t('addHearing') }}</span>
                         </button>
-
                     </div>
-
                 </form>
-
-                <!-- Hearings List -->
 
                 <div
                     v-for="hearing in legalCase.hearings"
                     :key="hearing.id"
                     class="border rounded-xl p-5 mb-4"
                 >
-
                     <div class="flex justify-between items-start">
-
                         <div>
-
-                            <!-- Title -->
-
                             <div class="font-bold text-lg text-[#1F2933]">
-
                                 {{ hearing.title }}
-
                             </div>
 
-                            <!-- Court -->
-
                             <div class="text-sm text-gray-500 mt-1">
-
                                 {{ hearing.court || '-' }}
-
                             </div>
-
-                            <!-- Date -->
 
                             <div class="text-sm text-gray-500 mt-1">
-
-                                {{
-                                    new Date(hearing.hearing_date)
-                                        .toLocaleString()
-                                }}
-
+                                {{ new Date(hearing.hearing_date).toLocaleString() }}
                             </div>
 
-                            <!-- Result -->
-
-                            <div
-                                v-if="hearing.result"
-                                class="text-sm mt-3"
-                            >
-
-                                <span class="font-bold">
-                                    {{ t('result') }}:
-                                </span>
-
+                            <div v-if="hearing.result" class="text-sm mt-3">
+                                <span class="font-bold">{{ t('result') }}:</span>
                                 {{ hearing.result }}
-
                             </div>
 
-                            <!-- Notes -->
-
-                            <div
-                                v-if="hearing.notes"
-                                class="text-sm mt-2"
-                            >
-
-                                <span class="font-bold">
-                                    {{ t('notes') }}:
-                                </span>
-
+                            <div v-if="hearing.notes" class="text-sm mt-2">
+                                <span class="font-bold">{{ t('notes') }}:</span>
                                 {{ hearing.notes }}
-
                             </div>
-
                         </div>
-
-                        <!-- Delete -->
 
                         <button
                             @click="deleteHearing(hearing.id)"
@@ -554,53 +425,80 @@ const deleteDocument = (id) => {
                         >
                             {{ t('delete') }}
                         </button>
-
                     </div>
-
                 </div>
-
             </div>
-            <!-- Tasks -->
-            <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-8 mt-8">
 
+            <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-8 mt-8">
                 <h2 class="text-xl font-bold text-[#1F2933] mb-6">
                     {{ t('tasks') }}
                 </h2>
 
                 <form @submit.prevent="addTask" class="grid grid-cols-2 gap-6 mb-8">
-
                     <div>
                         <label class="font-semibold">{{ t('taskTitle') }}</label>
-                        <input v-model="taskForm.title" class="w-full border rounded-xl p-3 mt-2">
+                        <TextInput v-model="taskForm.title" :error="taskForm.errors.title" />
+                        <InputError :message="taskForm.errors.title" />
                     </div>
 
                     <div>
                         <label class="font-semibold">{{ t('assignedTo') }}</label>
-                        <select v-model="taskForm.assigned_to" class="w-full border rounded-xl p-3 mt-2">
+
+                        <SelectInput
+                            v-model="taskForm.assigned_to"
+                            :error="taskForm.errors.assigned_to"
+                        >
                             <option value="">--</option>
-                            <option v-for="user in users" :key="user.id" :value="user.id">
+
+                            <option
+                                v-for="user in users"
+                                :key="user.id"
+                                :value="user.id"
+                            >
                                 {{ user.name }}
                             </option>
-                        </select>
+                        </SelectInput>
+
+                        <InputError :message="taskForm.errors.assigned_to" />
                     </div>
 
                     <div>
                         <label class="font-semibold">{{ t('priority') }}</label>
-                        <select v-model="taskForm.priority" class="w-full border rounded-xl p-3 mt-2">
+
+                        <SelectInput
+                            v-model="taskForm.priority"
+                            :error="taskForm.errors.priority"
+                        >
                             <option value="low">{{ t('low') }}</option>
                             <option value="medium">{{ t('medium') }}</option>
                             <option value="high">{{ t('high') }}</option>
-                        </select>
+                        </SelectInput>
+
+                        <InputError :message="taskForm.errors.priority" />
                     </div>
 
                     <div>
                         <label class="font-semibold">{{ t('dueDate') }}</label>
-                        <input v-model="taskForm.due_date" type="datetime-local" class="w-full border rounded-xl p-3 mt-2">
+
+                        <TextInput
+                            v-model="taskForm.due_date"
+                            type="datetime-local"
+                            :error="taskForm.errors.due_date"
+                        />
+
+                        <InputError :message="taskForm.errors.due_date" />
                     </div>
 
                     <div class="col-span-2">
                         <label class="font-semibold">{{ t('description') }}</label>
-                        <textarea v-model="taskForm.description" rows="3" class="w-full border rounded-xl p-3 mt-2" />
+
+                        <TextareaInput
+                            v-model="taskForm.description"
+                            :error="taskForm.errors.description"
+                            :rows="3"
+                        />
+
+                        <InputError :message="taskForm.errors.description" />
                     </div>
 
                     <div class="col-span-2 flex justify-end">
@@ -608,16 +506,10 @@ const deleteDocument = (id) => {
                             :disabled="taskForm.processing"
                             class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            <span v-if="taskForm.processing">
-                                {{ t('saving') }}
-                            </span>
-
-                            <span v-else>
-                                {{ t('addTask') }}
-                            </span>
+                            <span v-if="taskForm.processing">{{ t('saving') }}</span>
+                            <span v-else>{{ t('addTask') }}</span>
                         </button>
                     </div>
-
                 </form>
 
                 <div
@@ -662,10 +554,9 @@ const deleteDocument = (id) => {
                         {{ t('delete') }}
                     </button>
                 </div>
-
             </div>
-            <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-8 mt-8">
 
+            <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-8 mt-8">
                 <h2 class="text-xl font-bold text-[#1F2933] mb-6">
                     {{ t('activityTimeline') }}
                 </h2>
@@ -675,9 +566,7 @@ const deleteDocument = (id) => {
                     :key="log.id"
                     class="border-s-4 border-[#D4AF37] ps-5 mb-6 relative"
                 >
-                    <div
-                        class="absolute w-4 h-4 bg-[#D4AF37] rounded-full -start-[10px] top-1"
-                    />
+                    <div class="absolute w-4 h-4 bg-[#D4AF37] rounded-full -start-[10px] top-1" />
 
                     <div class="flex justify-between items-start">
                         <div>
@@ -711,10 +600,7 @@ const deleteDocument = (id) => {
                             }}
                         </div>
 
-                        <div
-                            v-if="log.new_values"
-                            class="mt-2"
-                        >
+                        <div v-if="log.new_values" class="mt-2">
                             <span class="font-bold text-green-700">
                                 {{ t('new') }}:
                             </span>
@@ -726,7 +612,6 @@ const deleteDocument = (id) => {
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </AuthenticatedLayout>

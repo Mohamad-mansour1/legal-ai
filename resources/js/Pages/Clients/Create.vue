@@ -1,10 +1,10 @@
 <script setup>
 import { useForm, Link } from '@inertiajs/vue3'
 import { useI18n } from 'vue-i18n'
+
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import InputError from '@/Components/Form/InputError.vue'
 import TextInput from '@/Components/Form/TextInput.vue'
-import SelectInput from '@/Components/Form/SelectInput.vue'
 import TextareaInput from '@/Components/Form/TextareaInput.vue'
 
 const { t } = useI18n()
@@ -36,18 +36,18 @@ const submit = () => form.post('/clients')
 
             <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-8">
                 <form @submit.prevent="submit" class="space-y-6">
-
                     <div class="grid grid-cols-2 gap-6">
-
                         <div>
                             <label class="font-semibold">
                                 {{ t('name') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.name"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.name"
+                            />
+
+                            <InputError :message="form.errors.name" />
                         </div>
 
                         <div>
@@ -55,10 +55,12 @@ const submit = () => form.post('/clients')
                                 {{ t('phone') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.phone"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.phone"
+                            />
+
+                            <InputError :message="form.errors.phone" />
                         </div>
 
                         <div>
@@ -66,11 +68,13 @@ const submit = () => form.post('/clients')
                                 {{ t('email') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.email"
                                 type="email"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
+                                :error="form.errors.email"
+                            />
+
+                            <InputError :message="form.errors.email" />
                         </div>
 
                         <div>
@@ -78,12 +82,13 @@ const submit = () => form.post('/clients')
                                 {{ t('nationalId') }}
                             </label>
 
-                            <input
+                            <TextInput
                                 v-model="form.national_id"
-                                class="w-full border rounded-xl p-3 mt-2"
-                            >
-                        </div>
+                                :error="form.errors.national_id"
+                            />
 
+                            <InputError :message="form.errors.national_id" />
+                        </div>
                     </div>
 
                     <div>
@@ -91,11 +96,13 @@ const submit = () => form.post('/clients')
                             {{ t('address') }}
                         </label>
 
-                        <textarea
+                        <TextareaInput
                             v-model="form.address"
-                            rows="3"
-                            class="w-full border rounded-xl p-3 mt-2"
+                            :error="form.errors.address"
+                            :rows="3"
                         />
+
+                        <InputError :message="form.errors.address" />
                     </div>
 
                     <div>
@@ -103,15 +110,16 @@ const submit = () => form.post('/clients')
                             {{ t('notes') }}
                         </label>
 
-                        <textarea
+                        <TextareaInput
                             v-model="form.notes"
-                            rows="4"
-                            class="w-full border rounded-xl p-3 mt-2"
+                            :error="form.errors.notes"
+                            :rows="4"
                         />
+
+                        <InputError :message="form.errors.notes" />
                     </div>
 
                     <div class="flex justify-between pt-4">
-
                         <Link
                             href="/clients"
                             class="px-5 py-3 rounded-xl border"
@@ -120,13 +128,18 @@ const submit = () => form.post('/clients')
                         </Link>
 
                         <button
-                            class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow"
+                            :disabled="form.processing"
+                            class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {{ t('saveClient') }}
+                            <span v-if="form.processing">
+                                {{ t('saving') }}
+                            </span>
+
+                            <span v-else>
+                                {{ t('saveClient') }}
+                            </span>
                         </button>
-
                     </div>
-
                 </form>
             </div>
         </div>

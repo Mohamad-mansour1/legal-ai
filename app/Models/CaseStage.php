@@ -12,4 +12,9 @@ class CaseStage extends Model
         'sort_order',
         'is_final',
     ];
+
+    public function legalCases()
+    {
+        return $this->hasMany(LegalCase::class);
+    }
 }

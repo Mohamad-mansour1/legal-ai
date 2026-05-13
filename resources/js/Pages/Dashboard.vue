@@ -1,10 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 
 const { t, locale } = useI18n()
 
-defineProps({
+const props = defineProps({
     totalClients: Number,
     totalCases: Number,
     totalDocuments: Number,
@@ -12,7 +13,56 @@ defineProps({
     upcomingHearings: Array,
     recentCases: Array,
     recentActivities: Array,
+    casesByStage: Array,
+    casesPerLawyer: Array,
+    overdueTasks: Number,
 })
+
+const casesChart = {
+    series: props.casesByStage.map(s => s.legal_cases_count),
+
+    chartOptions: {
+        chart: {
+            type: 'donut',
+        },
+
+        labels: props.casesByStage.map(stage =>
+            locale.value === 'ar'
+                ? stage.name_ar
+                : stage.name_en
+        ),
+
+        legend: {
+            position: 'bottom',
+        },
+    },
+}
+const lawyersChart = computed(() => ({
+
+    series: [{
+        data: props.casesPerLawyer.map(
+            lawyer => lawyer.assigned_cases_count
+        )
+    }],
+
+    chartOptions: {
+
+        chart: {
+            type: 'bar',
+            toolbar: {
+                show: false,
+            },
+        },
+
+        xaxis: {
+            categories: props.casesPerLawyer.map(
+                lawyer => lawyer.name
+            ),
+        },
+
+    },
+
+}))
 </script>
 
 <template>
@@ -71,6 +121,48 @@ defineProps({
                     <div class="text-4xl font-bold text-[#1F2933] mt-2">
                         {{ pendingTasks }}
                     </div>
+                </div>
+
+            </div>
+
+            <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-6">
+
+                <h2 class="text-xl font-bold text-[#1F2933] mb-6">
+                    {{ t('casesByStatus') }}
+                </h2>
+
+                <apexchart
+                    type="donut"
+                    height="350"
+                    :options="casesChart.chartOptions"
+                    :series="casesChart.series"
+                />
+
+            </div>
+
+            <div class="bg-white rounded-2xl shadow border border-[#E5DCCB] p-6 mt-8">
+
+                <h2 class="text-xl font-bold text-[#1F2933] mb-6">
+                    {{ t('casesPerLawyer') }}
+                </h2>
+
+                <apexchart
+                    type="bar"
+                    height="350"
+                    :options="lawyersChart.chartOptions"
+                    :series="lawyersChart.series"
+                />
+
+            </div>
+
+            <div class="bg-white rounded-2xl shadow border border-red-200 p-6">
+
+                <div class="text-red-500 text-sm">
+                    {{ t('overdueTasks') }}
+                </div>
+
+                <div class="text-4xl font-bold text-red-600 mt-2">
+                    {{ overdueTasks }}
                 </div>
 
             </div>

@@ -5,7 +5,6 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import InputError from '@/Components/Form/InputError.vue'
 import TextInput from '@/Components/Form/TextInput.vue'
 import SelectInput from '@/Components/Form/SelectInput.vue'
-import TextareaInput from '@/Components/Form/TextareaInput.vue'
 
 const { t } = useI18n()
 
@@ -41,23 +40,25 @@ const submit = () => form.post('/users')
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="font-semibold">{{ t('name') }}</label>
-                            <TextInput v-model="form.name" :error="form.errors.name"/>
+                            <TextInput v-model="form.name" :error="form.errors.name" />
                             <InputError :message="form.errors.name" />
                         </div>
 
                         <div>
                             <label class="font-semibold">{{ t('email') }}</label>
-                            <input v-model="form.email" type="email" class="w-full border rounded-xl p-3 mt-2">
+                            <TextInput v-model="form.email" type="email" :error="form.errors.email" />
+                            <InputError :message="form.errors.email" />
                         </div>
 
                         <div>
                             <label class="font-semibold">{{ t('password') }}</label>
-                            <input v-model="form.password" type="password" class="w-full border rounded-xl p-3 mt-2">
+                            <TextInput v-model="form.password" type="password" :error="form.errors.password" />
+                            <InputError :message="form.errors.password" />
                         </div>
 
                         <div>
                             <label class="font-semibold">{{ t('role') }}</label>
-                            <select v-model="form.role" class="w-full border rounded-xl p-3 mt-2">
+                            <SelectInput v-model="form.role" :error="form.errors.role">
                                 <option value="">--</option>
 
                                 <option
@@ -67,7 +68,8 @@ const submit = () => form.post('/users')
                                 >
                                     {{ t(role.name) }}
                                 </option>
-                            </select>
+                            </SelectInput>
+                            <InputError :message="form.errors.role" />
                         </div>
                     </div>
 
@@ -78,17 +80,10 @@ const submit = () => form.post('/users')
 
                         <button
                             :disabled="form.processing"
-                            class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow disabled:opacity-50"
+                            class="bg-[#D4AF37] text-black px-6 py-3 rounded-xl font-bold shadow disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-
-                            <span v-if="form.processing">
-                                {{ t('saving') }}
-                            </span>
-
-                            <span v-else>
-                                {{ t('saveUser') }}
-                            </span>
-
+                            <span v-if="form.processing">{{ t('saving') }}</span>
+                            <span v-else>{{ t('saveUser') }}</span>
                         </button>
                     </div>
                 </form>

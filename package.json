@@ -21,6 +21,11 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "vue-i18n": "^11.4.2"
+        "@fullcalendar/daygrid": "^6.1.20",
+        "@fullcalendar/interaction": "^6.1.20",
+        "@fullcalendar/vue3": "^6.1.20",
+        "apexcharts": "^5.11.0",
+        "vue-i18n": "^11.4.2",
+        "vue3-apexcharts": "^1.11.1"
     }
 }

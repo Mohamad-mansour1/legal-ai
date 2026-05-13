@@ -15,6 +15,12 @@ class DashboardController extends Controller
     public function index()
     {
         return Inertia::render('Dashboard', [
+            'casesByStage' => \App\Models\CaseStage::withCount('legalCases')->get(),
+            
+            'casesPerLawyer' => \App\Models\User::role('lawyer')->withCount('assignedCases')->get(),
+
+            'overdueTasks' => \App\Models\Task::where('status', '!=', 'completed')->whereNotNull('due_date')->where('due_date', '<', now())->count(),
+            
             'totalClients' => Client::count(),
 
             'totalCases' => LegalCase::count(),

@@ -14,6 +14,8 @@ const props = defineProps({
     hearings: Array,
 })
 
+const search = ref(props.query || '')
+
 const searching = ref(false)
 
 const submitSearch = () => {

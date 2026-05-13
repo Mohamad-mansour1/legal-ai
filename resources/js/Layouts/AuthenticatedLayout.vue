@@ -1,25 +1,33 @@
 <script setup>
-    import { Link, usePage } from '@inertiajs/vue3'
-    import { computed } from 'vue'
-    import { useI18n } from 'vue-i18n'
+import { Link, usePage } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
-    const page = usePage()
-    const { t, locale } = useI18n()
+const page = usePage()
+const { t, locale } = useI18n()
 
-    const isArabic = computed(() => locale.value === 'ar')
+const isArabic = computed(() => locale.value === 'ar')
 
-    const isActive = (url) => page.url.startsWith(url)
+const userRoles = computed(() => page.props.auth.user.roles || [])
 
-    const switchLang = () => {
-        locale.value = locale.value === 'ar' ? 'en' : 'ar'
-        localStorage.setItem('locale', locale.value)
+const canManageUsers = computed(() => {
+    return userRoles.value.includes('owner') || userRoles.value.includes('admin')
+})
 
-        document.documentElement.dir = locale.value === 'ar' ? 'rtl' : 'ltr'
-        document.documentElement.lang = locale.value
-    }
+const isActive = (url) => page.url.startsWith(url)
 
-    document.documentElement.dir = isArabic.value ? 'rtl' : 'ltr'
+const switchLang = () => {
+    locale.value = locale.value === 'ar' ? 'en' : 'ar'
+    localStorage.setItem('locale', locale.value)
+
+    document.documentElement.dir = locale.value === 'ar' ? 'rtl' : 'ltr'
     document.documentElement.lang = locale.value
+}
+
+const notifications = computed(() => page.props.notifications || [])
+
+document.documentElement.dir = isArabic.value ? 'rtl' : 'ltr'
+document.documentElement.lang = locale.value
 </script>
 
 <template>
@@ -50,6 +58,7 @@
                 </Link>
 
                 <Link
+                    v-if="canManageUsers"
                     href="/users"
                     class="block p-3 rounded-lg transition"
                     :class="isActive('/users') ? 'bg-[#D4AF37] text-black font-bold' : 'hover:bg-[#2E3A46]'"
@@ -80,6 +89,66 @@
                 >
                     {{ t('globalSearch') }}
                 </Link>
+                <Link
+                    href="/calendar"
+                    class="block p-3 rounded-lg transition"
+                    :class="isActive('/calendar') ? 'bg-[#D4AF37] text-black font-bold' : 'hover:bg-[#2E3A46]'"
+                >
+                    {{ t('calendar') }}
+                </Link>
+                <div class="bg-[#2E3A46] rounded-xl p-4">
+
+                    <div class="flex items-center justify-between mb-3">
+
+                        <h3 class="font-bold text-white">
+                            🔔 {{ t('notifications') }}
+                        </h3>
+
+                        <span
+                            v-if="notifications.length"
+                            class="bg-red-500 text-white text-xs px-2 py-1 rounded-full"
+                        >
+                            {{ notifications.length }}
+                        </span>
+
+                    </div>
+
+                    <div
+                        v-if="notifications.length"
+                        class="space-y-3 max-h-60 overflow-auto"
+                    >
+
+                        <button
+                            v-for="notification in notifications"
+                            :key="notification.id"
+                            @click="$inertia.post(`/notifications/${notification.id}/read`)"
+                            class="w-full text-start bg-[#1F2933] p-3 rounded-lg hover:bg-[#384552] transition"
+                        >
+
+                            <p class="text-sm font-bold text-[#D4AF37]">
+                                {{ notification.title }}
+                            </p>
+
+                            <p class="text-xs text-gray-300 mt-1">
+                                {{ notification.message }}
+                            </p>
+
+                            <p class="text-[11px] text-gray-500 mt-2">
+                                {{ notification.created_at }}
+                            </p>
+
+                        </button>
+
+                    </div>
+
+                    <div
+                        v-else
+                        class="text-sm text-gray-400"
+                    >
+                        {{ t('noNotifications') }}
+                    </div>
+
+                </div>
 
             </nav>
 

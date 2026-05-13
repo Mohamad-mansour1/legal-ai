@@ -52,4 +52,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Task::class, 'assigned_to');
     }
+    
+    public function assignedCases()
+    {
+        return $this->hasMany(
+            \App\Models\LegalCase::class,
+            'assigned_lawyer_id'
+        );
+    }
 }
